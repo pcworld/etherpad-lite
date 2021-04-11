@@ -221,8 +221,8 @@ exports.handleMessage = async (socket, message) => {
   // check if pad is requested via readOnly
   let padId = auth.padID;
 
-  if (padId.indexOf('r.') === 0) {
-    // Pad is readOnly, first get the real Pad ID
+  if (readOnlyManager.isReadOnlyId(padId)) {
+    // pad is read-only, first get the real pad ID
     padId = await readOnlyManager.getPadId(padId);
   }
 
