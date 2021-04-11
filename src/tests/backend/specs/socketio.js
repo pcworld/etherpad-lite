@@ -168,6 +168,24 @@ describe(__filename, function () {
       const clientVars = await handshake(socket, 'pad');
       assert.equal(clientVars.type, 'CLIENT_VARS');
     });
+    it('authn user readonly pad -> 200, ok', async function () {
+      this.timeout(400);
+      settings.requireAuthentication = true;
+      let res = await agent.get('/p/pad').auth('user', 'user-password').expect(200);
+      socket = await connect(res);
+      let clientVars = await handshake(socket, 'pad');
+      assert.equal(clientVars.type, 'CLIENT_VARS');
+      assert.equal(clientVars.data.readonly, false);
+      const readOnlyId = clientVars.data.readOnlyId;
+      assert.match(readOnlyId, /^r\..+/);
+      socket.close();
+
+      res = await agent.get('/p/' + readOnlyId).auth('user', 'user-password').expect(200);
+      socket = await connect(res);
+      clientVars = await handshake(socket, readOnlyId);
+      assert.equal(clientVars.type, 'CLIENT_VARS');
+      assert.equal(clientVars.data.readonly, true);
+    });
     it('authz user /p/pad -> 200, ok', async function () {
       this.timeout(400);
       settings.requireAuthentication = true;
